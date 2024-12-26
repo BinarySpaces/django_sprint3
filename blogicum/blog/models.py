@@ -24,7 +24,7 @@ class Category(PublishedModel):
     )
 
     class Meta:
-        verbose_name = 'категорию'
+        verbose_name = 'категория'
         verbose_name_plural = 'Категории'
 
     def __str__(self):
@@ -36,8 +36,7 @@ class Location(PublishedModel):
 
     name = models.CharField(
         max_length=256,
-        verbose_name='Название места',
-        blank=True,
+        verbose_name='Название места'
     )
 
     class Meta:
@@ -63,12 +62,13 @@ class Post(PublishedModel):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name='Автор публикации'
+        verbose_name='Автор публикации',
     )
     location = models.ForeignKey(
         Location,
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
         verbose_name='Местоположение'
     )
     category = models.ForeignKey(
@@ -79,7 +79,7 @@ class Post(PublishedModel):
     )
 
     class Meta:
-        verbose_name = 'публикацию'
+        verbose_name = 'публикация'
         verbose_name_plural = 'Публикации'
 
     def __str__(self):
