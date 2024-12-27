@@ -1,24 +1,20 @@
-from django.utils import timezone
 from django.shortcuts import (
-    get_list_or_404,
     get_object_or_404,
     render
 )
+from django.utils import timezone
 
-from blog.models import Post, Category
-
-
-current_time = timezone.now()
+from blog.models import Category, Post
 
 
-def get_posts():
+def get_posts(post_objects=Post.objects):
     """Посты из БД."""
-    return Post.objects.select_related(
+    return post_objects.select_related(
         'category',
         'location',
         'author'
     ).filter(
-        pub_date__lte=current_time,
+        pub_date__lte=timezone.now(),
         is_published=True,
         category__is_published=True
     )
@@ -26,18 +22,20 @@ def get_posts():
 
 def index(request):
     """Главная страница."""
-    post_list = get_posts().order_by("-pub_date")[:5]
-    context = {'post_list': post_list}
+    return render(
+        request,
+        'blog/index.html',
+        {'posts': get_posts()[:5]}
+    )
 
-    return render(request, 'blog/index.html', context)
 
-
-def post_detail(request, id):
+def post_detail(request, post_id):
     """Полное описание выбранной записи."""
-    post = get_object_or_404(get_posts(), pk=id)
-    context = {'post': post}
-
-    return render(request, 'blog/detail.html', context)
+    return render(
+        request,
+        'blog/detail.html',
+        {'post': get_object_or_404(get_posts(), pk=post_id)}
+    )
 
 
 def category_posts(request, category_slug):
@@ -46,9 +44,12 @@ def category_posts(request, category_slug):
         Category.objects.filter(is_published=True),
         slug=category_slug
     )
-    post_list = get_list_or_404(
-        get_posts().filter(category__slug=category_slug)
-    )
-    context = {'category': category, 'post_list': post_list}
 
-    return render(request, 'blog/category.html', context)
+    return render(
+        request,
+        'blog/category.html',
+        {
+            'category': category,
+            'post_list': get_posts(category.category_posts)
+        }
+    )
